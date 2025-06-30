@@ -1,46 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 )
 
 type Todo struct {
-	Id        int    `json:"id"`
+	UserID    int    `json:"userId"`
+	ID        int    `json:"id"`
 	Title     string `json:"title"`
 	Completed bool   `json:"completed"`
-	UserId    int    `json:"userId"`
 }
 
+// This program fetches a TODO item from a public API and prints it to the console.
 func main() {
-	req, err := http.Get("https://jsonplaceholder.typicode.com/todos/2")
+	res, err := http.Get("https://jsonplaceholder.typicode.com/todos/1")
 	if err != nil {
-		return
+		fmt.Println("Error fetching data:", err)
 	}
-	// var t Todo
-	// fmt.Println()
-	// dat := json.NewDecoder(req.Body).Decode(&t)
-	// if dat != nil {
-	// 	return
+	defer res.Body.Close()
+	// if res.StatusCode != http.StatusOK {
+	// 	fmt.Println(res.Status)
+	// } else if res.StatusCode == http.StatusOK {
+	// 	data, err := io.ReadAll(res.Body)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	} else {
+	// 		fmt.Println(string(data))
+	// 	}
 	// }
-	// fmt.Println(t)
-	defer req.Body.Close() //close the body to prevent resource leak
-	//consumed once used
-	// fmt.Println(req)
-	// fmt.Println(req.Body)
-	// data, _ := io.ReadAll(req.Body)
-	// fmt.Println(data)
-	// fmt.Println(string(data))
-	// var t Todo
-	// _ = json.Unmarshal(data, &t)
-	// fmt.Println(t)
-	// var t Todo
-	// dat := json.NewDecoder(req.Body).Decode(&t)
-	// if dat != nil {
-	// 	fmt.Println("Error decoding JSON:", dat)
-	// }
-	// fmt.Println(t)
-	dat, _ := io.ReadAll(req.Body) //read the body
-	fmt.Println(string(dat))       //convert to string and print
+	var todo Todo
+	err = json.NewDecoder(res.Body).Decode(&todo)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+	} else {
+		fmt.Println(todo)
+		fmt.Printf("User ID: %d, ID: %d, Title: %s, Completed: %t\n", todo.UserID, todo.ID, todo.Title, todo.Completed)
+	}
 }
